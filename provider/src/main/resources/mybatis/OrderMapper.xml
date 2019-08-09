@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.std.order.dao.OrderMapper">
+	
+	<select id="getOrderInfoById" parameterType="java.lang.String" resultType="org.std.model.OrderInfo">
+		select `orderid`, `title`, `createtime`, `money`
+		from `v3a_orderinfo`
+		where `orderid` = #{orderid}
+	</select>
+	
+</mapper>
