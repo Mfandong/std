@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "dubbo.registry.protocol",
+  "type": "java.lang.String",
+  "description": "A description for 'dubbo.registry.protocol'"
+}]}
