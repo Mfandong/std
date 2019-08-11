@@ -2,13 +2,17 @@ package org.std;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.std.config.redis.RedisService;
 import org.std.model.OrderInfo;
+import org.std.order.service.IAsyncService;
 import org.std.order.service.IOrderbaseService;
 import org.std.order.service.IRedisCacheService;
+import org.std.task.QuartzService;
+import org.std.task.ScheduleJob;
 import org.std.util.CuratorLockUtils;
 import org.std.util.RedisLockUtils;
 
@@ -26,6 +30,10 @@ public class ProviderApplicationTest {
 	private CuratorLockUtils curator;
 	@Autowired
 	private RedisLockUtils redisLock;
+	@Autowired
+	private IAsyncService asyncService;
+	@Autowired
+	private QuartzService quartzService;
 	
 	@Test
 	public void getOrderInfoTest(){
@@ -180,4 +188,26 @@ public class ProviderApplicationTest {
 		Thread.sleep(60000);
 	}
 	
+	@Test
+	public void asyncServiceTest() throws InterruptedException {
+		System.out.println("当前线程：" + Thread.currentThread().getName());
+		asyncService.asyncGetOrderInfoById("110000001-190724102342119121");
+		System.out.println("主线程继续执行，业务逻辑交由子线程执行");
+		Thread.sleep(5000);
+	}
+	
+	@Test
+	public void quarzTest() throws Exception {
+		ScheduleJob job2 = new ScheduleJob("job2", "2", "org.std.order.task.MyJobService", "0 0/1 * * * ? ");
+		ScheduleJob job3 = new ScheduleJob("job3", "3", "org.std.order.task.MyJobService", "0 0/1 * * * ? ");
+		quartzService.addJob(job2);
+		quartzService.addJob(job3);
+		Thread.sleep(60000*3);
+		quartzService.removeJob("job2");
+		Thread.sleep(60000*3);
+		ScheduleJob job4 = new ScheduleJob("job3", "3", "org.std.order.task.MyJobService", "0 0/2 * * * ? ");
+		quartzService.updateJob(job4);
+		
+		Thread.sleep(60000*20);
+	}
 }
