@@ -25,7 +25,7 @@ public class TaskService {
 		ScheduleJob job = new ScheduleJob();
 		job.setJobId("1");
 		job.setJobName("测试定时任务");
-		job.setJobClass("org.std.order.task.MyJobService");
+		job.setJobClass("org.std.task.MyJobService");
 		job.setJobCron("0 0/1 * * * ? ");
 		jobList.add(job);
 	}

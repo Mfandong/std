@@ -198,14 +198,14 @@ public class ProviderApplicationTest {
 	
 	@Test
 	public void quarzTest() throws Exception {
-		ScheduleJob job2 = new ScheduleJob("job2", "2", "org.std.order.task.MyJobService", "0 0/1 * * * ? ");
-		ScheduleJob job3 = new ScheduleJob("job3", "3", "org.std.order.task.MyJobService", "0 0/1 * * * ? ");
+		ScheduleJob job2 = new ScheduleJob("job2", "2", "org.std.task.MyJobService", "0 0/1 * * * ? ");
+		ScheduleJob job3 = new ScheduleJob("job3", "3", "org.std.task.MyJobService", "0 0/1 * * * ? ");
 		quartzService.addJob(job2);
 		quartzService.addJob(job3);
 		Thread.sleep(60000*3);
 		quartzService.removeJob("job2");
 		Thread.sleep(60000*3);
-		ScheduleJob job4 = new ScheduleJob("job3", "3", "org.std.order.task.MyJobService", "0 0/2 * * * ? ");
+		ScheduleJob job4 = new ScheduleJob("job3", "3", "org.std.task.MyJobService", "0 0/2 * * * ? ");
 		quartzService.updateJob(job4);
 		
 		Thread.sleep(60000*20);
