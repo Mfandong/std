@@ -14,7 +14,7 @@ import org.std.config.rocketmq.RocketMQMessageEvent;
 @Component
 public class RocketMQConsumerService {
 	
-	@EventListener(condition = "#event.msgs[0].topic='std-topic' && #event.msgs[0].tags='std-tag'")
+	@EventListener(condition = "#event.msgs[0].topic=='std-topic' && #event.msgs[0].tags=='std-tag'")
 	public void rocketMQMsgListener(RocketMQMessageEvent event) {
 		try {
 			List<MessageExt> msgs = event.getMsgs();

@@ -14,7 +14,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class RocketMqConsumer {
 	@Value("${std.rocketmq.consumerGroup}")
 	private String consumerGroup;

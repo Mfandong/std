@@ -18,7 +18,7 @@ import org.std.rocketmq.RocketMqMessage;
 
 import com.alibaba.fastjson.JSON;
 
-@Component
+//@Component
 public class RocketMqProducer {
 
 	@Value("${std.rocketmq.producerGroup}")

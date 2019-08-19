@@ -12,7 +12,7 @@ import com.alibaba.dubbo.config.spring.context.annotation.EnableDubbo;
 
 @SpringBootApplication
 @EnableDubbo//开启dubbo
-@DubboComponentScan(basePackages={"org.std.business"})
+@DubboComponentScan(basePackages={"org.std"})
 @ComponentScan(basePackages={"org.std"})//配置spring注解扫描包
 @EnableTransactionManagement //开启事务
 @EnableAspectJAutoProxy //开启AOP

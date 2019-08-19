@@ -1,6 +1,7 @@
 package org.std.config.rocketmq;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
@@ -12,6 +13,8 @@ import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.LocalTransactionState;
+import org.apache.rocketmq.client.producer.TransactionCheckListener;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
@@ -31,14 +34,14 @@ public class RocketMQConfiguration {
 	
 	//事件监听
 	@Autowired
-	private ApplicationEventPublisher publisher = null;
+	private ApplicationEventPublisher publisher;
 	
 	private static boolean isFirstSub = true;
 	
 	private static long startTime = System.currentTimeMillis();
 	
 	private static Logger logger = LoggerFactory.getLogger(RocketMQConfiguration.class);
-	@Bean
+	@Bean(name="defaultMQProducer")
 	public DefaultMQProducer defaultProducer() throws MQClientException {
 		DefaultMQProducer producer = new DefaultMQProducer(rocketMQProperties.getProducerGroupName());
 		producer.setNamesrvAddr(rocketMQProperties.getNamesrvAddr());
@@ -50,7 +53,7 @@ public class RocketMQConfiguration {
 		return producer;
 	}
 	
-	@Bean
+	@Bean(name="transactionMQProducer")
 	public TransactionMQProducer transactionProducer() throws MQClientException {
 		TransactionMQProducer producer = new TransactionMQProducer(rocketMQProperties.getTransactionProducerGroupName());
 		producer.setNamesrvAddr(rocketMQProperties.getNamesrvAddr());
@@ -62,11 +65,13 @@ public class RocketMQConfiguration {
 		producer.setCheckThreadPoolMaxSize(2);
 		//队列数
 		producer.setCheckRequestHoldMax(2000);
+		producer.setTransactionCheckListener(new TransactionCheckListenerImpl());
 		producer.start();
 		logger.info("rocketmq transaction producer server is starting...");
 		return producer;
 	}
 	
+	@Bean
 	public DefaultMQPushConsumer publicConsumer() throws MQClientException{
 		DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(rocketMQProperties.getConsumerGroupName());
 		consumer.setNamesrvAddr(rocketMQProperties.getNamesrvAddr());
@@ -114,7 +119,7 @@ public class RocketMQConfiguration {
 						if (msgs.size() == 0) {
 							return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
 						}
-						publisher.publishEvent(new RocketMQMessageEvent(null, consumer));
+						publisher.publishEvent(new RocketMQMessageEvent(msgs, consumer));
 					} catch (Exception e) {
 						e.printStackTrace();
 						return ConsumeConcurrentlyStatus.RECONSUME_LATER;
@@ -155,5 +160,37 @@ public class RocketMQConfiguration {
 			isFirstSub = false;
 		}
 		return msgs;
+	}
+	
+	class TransactionCheckListenerImpl implements TransactionCheckListener {
+		private AtomicInteger transactionIndex = new AtomicInteger(1);
+		@Override
+		public LocalTransactionState checkLocalTransactionState(MessageExt msg) {
+			System.out.println("server checking TrMsg " + msg.toString());
+
+			return checkIsCommitLocal();
+		}
+		
+		/**
+		 * rocketMQ消息回查，判断本地事务是否提交成功
+		 * @return
+		 */
+		private LocalTransactionState checkIsCommitLocal(){
+			int value = transactionIndex.getAndIncrement();
+			System.out.println("[TransactionCheckListenerImpl] --> " + value);
+			//如果5次确认查询本地事务都没有提交成功，则回滚消息
+			if ((value % 5) == 0){
+				return LocalTransactionState.ROLLBACK_MESSAGE;
+			}
+			
+			//查询数据库，判断库中是否存在该记录；模拟三次确认查询成功
+			if((value % 3) == 0){
+				return LocalTransactionState.COMMIT_MESSAGE;
+			}
+			
+			//数据库中没有记录，并且没有超出确认次数，则返回UNKNOW
+			return LocalTransactionState.UNKNOW;
+		}
+		
 	}
 }

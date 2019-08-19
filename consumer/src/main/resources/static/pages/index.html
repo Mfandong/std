@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<body>
+	<button id="proSearch">用户产品查询</button>
+</body>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#proSearch").click(function(){
+			$.ajax({
+				url: "http://40.73.77.115:8082/biz/1.0/userproducts?appid=1907166981&hid=MHK1552YD024751XFB81",
+				type: "get",
+				contentType: "application/json",
+				success: function(data){
+					debugger;
+					if (data.status == 0){
+						var res = data.data;
+						alert(JSON.stringify(res));
+					}
+				}
+			})
+		})
+	})
+	
+</script>
+</html>

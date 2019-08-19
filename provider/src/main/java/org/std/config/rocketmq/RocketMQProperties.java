@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @PropertySource("classpath:rocketmq.properties")
-@ConfigurationProperties(prefix = "org.rocketmq")
+@ConfigurationProperties(prefix = "std.rocketmq")
 @Configuration
 public class RocketMQProperties {
 
